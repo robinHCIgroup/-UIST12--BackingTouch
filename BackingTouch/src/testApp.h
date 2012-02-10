@@ -26,7 +26,6 @@ typedef struct {
 	bool 	bBeingDragged;
 	bool 	bOver;
     bool    bDest;
-//Reserved
 //    bool    bHalo;
 }	draggableVertex;
 
