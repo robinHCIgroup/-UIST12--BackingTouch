@@ -1,0 +1,18 @@
+NTUCmlab: Project BackingTouch
+[Core Functions]
+
+1.Before developing, please Download Openframework for iPhone from:
+http://www.openframeworks.cc/versions/preRelease_v0.07/of_preRelease_v007_iphone.zip
+
+2.After checkout, please place the two directory under /of_preRelease_v007_iphone/apps/iPhoneSpecificExamples/
+
+3.For BackingTouchBack, Please modify /testApp.h:9 #define HOST "DNIPhone.local" to your own hostname.
+
+4.Make sure that the two devices (Front and Back) are in the same subnet of wi-fi, so that they can communicate with each others.
+
+Contact me if you have any problems.
+
+Howie Rong-Hao Liang 
+hyaloid@gmail.com
+
+2012.02.09
