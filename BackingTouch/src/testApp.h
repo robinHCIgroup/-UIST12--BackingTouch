@@ -14,9 +14,9 @@
 #define NUM_OF_BACK 1
 #define Y_OFFSET 218
 
-#define TARGET_NUM 35
+#define TARGET_NUM 20
 #define MAG_RATE 2
-#define TARGET_R 44
+#define TARGET_R 15
 
 typedef struct {
 	float 	x;
@@ -138,6 +138,11 @@ public:
     void gotFocus();
     void gotMemoryWarning();
     void deviceOrientationChanged(int newOrientation);
+    
+    //Map
+    ofImage ntumap;
+    draggableVertex map;
+    ofPoint maporigin;
     
 };
 

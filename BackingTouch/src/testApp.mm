@@ -56,6 +56,11 @@ void testApp::setup(){
     else{
         clearTargets();
     }
+    
+    
+    //set map path and change the draw point
+    ntumap.loadImage("NTUCAMPUS.jpg");
+    ntumap.setAnchorPercent(0.5,0.5);
 }
 //--------------------------------------------------------------
 void testApp::update(){
@@ -156,6 +161,9 @@ void testApp::clearTargets(){
     isTargetTranslated = false;
     isDTransing = false;
     isTranslating = false;
+    
+    maporigin.x=320;
+    maporigin.y=480;
 }
 
 void testApp::resetTargets(){
@@ -194,6 +202,9 @@ void testApp::resetTargets(){
     isTargetTranslated = false;
     isDTransing = false;
     isTranslating = false;
+    
+    maporigin.x=320;
+    maporigin.y=480;
 } 
 //--------------------------------------------------------------
 
@@ -201,6 +212,7 @@ void testApp::canvasUpdate(){
     canvasScale = prevScale+tempScale;
     canvasCenter.x = -(prevCanvas.x + canvas.x);
     canvasCenter.y = -(prevCanvas.y + canvas.y);
+    
     for (int i = 0; i < TARGET_NUM; i++){
         landmarks[i].x = -(prevCanvas.x + canvas.x) + lmPos[i].x ;
         landmarks[i].y = -(prevCanvas.y + canvas.y) + lmPos[i].y ;
@@ -208,6 +220,15 @@ void testApp::canvasUpdate(){
         landmarks[i].y = canvasScale*(landmarks[i].y - focusZoom.y)+focusZoom.y;
     }
     radius= float(TARGET_R) * canvasScale;
+    
+    
+    
+    //change the map point
+    map.x=-(prevCanvas.x + canvas.x)+maporigin.x;
+    map.y=-(prevCanvas.y + canvas.y)+maporigin.y;
+    map.x=canvasScale*(map.x - focusZoom.x)+focusZoom.x;
+    map.y=canvasScale*(map.y - focusZoom.y)+focusZoom.y;
+    
 }
 
 
@@ -215,6 +236,13 @@ void testApp::canvasUpdate(){
 void testApp::stageUpdate(int _x, int _y, bool press, int bID){
     float dX,dY,targetDist;
     float FBDist;
+    
+    //draw map   
+    ofScale(canvasScale, canvasScale);
+    ofSetColor(255, 255, 255);
+    ntumap.draw(map.x/canvasScale,map.y/canvasScale);
+    ofScale(1/canvasScale, 1/canvasScale);
+    
     if(bBubble){
         selectedIndex = bubbleCursor(_x,_y,0);
         dX = _x - landmarks[selectedIndex].x;
@@ -313,7 +341,7 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
             }
         }else{
             if(press){
-                ofSetColor(0,255,0);
+                ofSetColor(255,0,0);
                 if(frontTouch[0].x>-1 && frontTouch[0].y>-1){
                     ofEnableAlphaBlending();
                     ofFill();
