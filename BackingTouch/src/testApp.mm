@@ -341,7 +341,7 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
             }
         }else{
             if(press){
-                ofSetColor(255,0,0);
+                ofSetColor(0,255,0);
                 if(frontTouch[0].x>-1 && frontTouch[0].y>-1){
                     ofEnableAlphaBlending();
                     ofFill();
@@ -524,8 +524,8 @@ int testApp::backMoved(int oscX, int oscY){
                 float dY = back[0].y;
                 float diff = sqrt(dX*dX + dY*dY);
                 tempScale = -(diff-zoomDiff)/500.;
-                if(prevScale+tempScale<=0.1){
-                    tempScale = 0.1-prevScale;
+                if(prevScale+tempScale<=0.5){
+                    tempScale = 0.5-prevScale;
                 }
                 if(prevScale+tempScale>=2){
                     tempScale = 2-prevScale;
