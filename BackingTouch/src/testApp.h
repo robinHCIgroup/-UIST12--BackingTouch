@@ -28,6 +28,8 @@ typedef struct {
     bool    bDest;
 //    bool    bHalo;
     bool    ingroup;
+    int     xmindist;
+    int     ymindist;
 }	draggableVertex;
 
 
@@ -156,6 +158,7 @@ public:
     ofPoint nextgrouppoint;
     ofPoint minboundary;
     ofPoint maxboundary;
+    ofPoint orginmin;
     int groupindex[TARGET_NUM];
     int groupitemnum;
     ofPoint choose;
