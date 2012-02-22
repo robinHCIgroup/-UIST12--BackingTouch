@@ -11,7 +11,8 @@ void testApp::setup(){
     ofxiPhoneDisableIdleTimer();
 	ofxRegisterMultitouch(this);
     ofSetCircleResolution(80);
-    ofBackground(0);	
+    //ofSetBackgroundAuto(false);
+    ofBackground(0,0,0);	
 	ofSetFrameRate(60);
     
     bBGView = false;
@@ -61,6 +62,13 @@ void testApp::setup(){
     //set map path and change the draw point
     ntumap.loadImage("NTUCAMPUS.jpg");
     ntumap.setAnchorPercent(0.5,0.5);
+    
+    resetgroup();
+    /*for (int i=0; i<960; i++) {
+        for (int j=0; j<640; j++) {
+            gpboundary[i][j]=false;
+        }
+    }*/
 }
 //--------------------------------------------------------------
 void testApp::update(){
@@ -149,6 +157,8 @@ void testApp::clearTargets(){
         lmPos[i].x = landmarks[i].x;
         lmPos[i].y = landmarks[i].y;
 		landmarks[i].radius = radius;
+        
+        landmarks[i].ingroup = false;
 	}
     canvas.x = 0;
     canvas.y = 0;
@@ -189,6 +199,8 @@ void testApp::resetTargets(){
             landmarks[i].bDest          = false;
         }
 		landmarks[i].radius = radius;
+        
+        landmarks[i].ingroup = false;
 	}
     canvas.x = 0;
     canvas.y = 0;
@@ -220,7 +232,9 @@ void testApp::canvasUpdate(){
         landmarks[i].y = canvasScale*(landmarks[i].y - focusZoom.y)+focusZoom.y;
     }
     radius= float(TARGET_R) * canvasScale;
+    //if landmark is in group, move them
     
+    //
     
     
     //change the map point
@@ -236,13 +250,12 @@ void testApp::canvasUpdate(){
 void testApp::stageUpdate(int _x, int _y, bool press, int bID){
     float dX,dY,targetDist;
     float FBDist;
-    
     //draw map   
     ofScale(canvasScale, canvasScale);
     ofSetColor(255, 255, 255);
     ntumap.draw(map.x/canvasScale,map.y/canvasScale);
     ofScale(1/canvasScale, 1/canvasScale);
-    
+
     if(bBubble){
         selectedIndex = bubbleCursor(_x,_y,0);
         dX = _x - landmarks[selectedIndex].x;
@@ -255,6 +268,11 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
             dY = _y - landmarks[selectedIndex].y;
             targetDist = sqrt(dX*dX + dY*dY);
         }
+       /* if(hasbgroup){
+            dX=_x-choose.x;
+            dY=_y-choose.y;
+            targetDist=sqrt(dX*dX + dY*dY);
+        }*/
     }
     ofSetColor(255);
     ofNoFill();
@@ -263,13 +281,40 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
         ofSetColor(255,255,255,78);
         if(isDTransing){
             if(fingerCID[0]>-1){
-                if(!press){
-                    landmarks[fingerCID[0]].x = prevLandmarkPos.x;
-                    landmarks[fingerCID[0]].y = prevLandmarkPos.y;
-                }else{
-                    landmarks[fingerCID[0]].x= _x;
-                    landmarks[fingerCID[0]].y= _y;
-                }
+                //if(!hasbgroup){
+                    if(!press){
+                        landmarks[fingerCID[0]].x = prevLandmarkPos.x;
+                        landmarks[fingerCID[0]].y = prevLandmarkPos.y;
+                    }else{
+                        landmarks[fingerCID[0]].x= _x;
+                        landmarks[fingerCID[0]].y= _y;
+                    }
+                /*}else{
+                    int bdrangex=maxboundary.x-minboundary.x;
+                    int bdrangey=maxboundary.y-minboundary.y;
+                    if(!press){
+                        minboundary.x = prevLandmarkPos.x;
+                        minboundary.y = prevLandmarkPos.y;
+                        for (int j=0; j<groupitemnum; j++) {
+                            landmarks[groupindex[j]].x=landmarks[groupindex[j]].x-dX;
+                            landmarks[groupindex[j]].y=landmarks[groupindex[j]].y-dY;
+                        }
+                    }else{
+                        choose.x=_x;
+                        choose.y=_y;
+                        minboundary.x = minboundary.x+dX;
+                        minboundary.y = minboundary.y+dY;
+                        //printf("%d\n",groupitemnum);
+                        for (int j=0; j<groupitemnum; j++) {
+                            printf("%d\n",groupindex[j]);
+                            landmarks[groupindex[j]].x=landmarks[groupindex[j]].x+dX;
+                            landmarks[groupindex[j]].y=landmarks[groupindex[j]].y+dY;
+                        }
+                        
+                    }
+                    maxboundary.x=minboundary.x+bdrangex;
+                    maxboundary.y=minboundary.y+bdrangey;
+                }*/
                 dX = _x - frontTouch[0].x;
                 dY = _y - frontTouch[0].y;
                 FBDist = sqrt(dX*dX + dY*dY);
@@ -277,7 +322,11 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
                 
                 ofEnableSmoothing();
                 ofSetLineWidth(radius - ((radius-1)*FBDist)/800.);
-                ofLine(frontTouch[0].x,frontTouch[0].y,landmarks[fingerCID[0]].x,landmarks[fingerCID[0]].y);
+                //if(!hasbgroup){
+                    ofLine(frontTouch[0].x,frontTouch[0].y,landmarks[fingerCID[0]].x,landmarks[fingerCID[0]].y);
+                //}else{
+                //    ofLine(frontTouch[0].x,frontTouch[0].y,choose.x,choose.y);
+                //}
                 ofSetLineWidth(1);
                 ofDisableSmoothing();
             }
@@ -289,6 +338,7 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
             if(press){
                 ofFill();
                 if(selectedIndex>-1){
+                    printf("123\n");
                     if(frontTouch[0].x>-1 && frontTouch[0].y>-1){
                         
                     }else{
@@ -319,12 +369,25 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
         }else{
             ofSetColor(0,255,0); 
         }
+        if (landmarks[i].ingroup) {
+            ofSetColor(255, 0, 0);
+        }
         ofCircle(circleX, circleY, circleR);
         ofNoFill();
         ofSetColor(52);
         ofCircle(circleX, circleY, circleR);                
     }
-    
+    //Group boundary
+    if (grouping || hasbgroup) {
+        ofEnableAlphaBlending();
+        ofFill();
+        ofSetColor(255,255,255,78);
+        ofSetLineWidth(radius);
+        ofRect(minboundary.x, minboundary.y, maxboundary.x-minboundary.x, maxboundary.y-minboundary.y);
+        ofNoFill();
+        ofSetLineWidth(1);
+        ofDisableAlphaBlending();
+    }
     if(bDTrans){
         if(isDTransing){
             if(fingerCID[0]>-1){
@@ -389,8 +452,9 @@ void testApp::touchDown(ofTouchEventArgs &touch){
             }else{
                 i = judgeRadius(back[0].x, back[0].y, 0);
             }
-            if(i>=0){
+            if(i>=0 && !landmarks[i].ingroup){
                 fingerCID[0] = i;
+                resetgroup();
                 landmarks[i].bOver = true;
                 if(landmarks[i].bDest){
                     isTargetSelected = true;
@@ -400,6 +464,28 @@ void testApp::touchDown(ofTouchEventArgs &touch){
                     prevLandmarkPos.y = landmarks[i].y;
                     landmarks[i].bBeingDragged = true;
                 }
+            }
+            if (hasbgroup) {
+                if(back[0].x>=minboundary.x && back[0].x<=minboundary.x |
+                   back[0].y>=minboundary.y && back[0].y<=maxboundary.y ){
+                    fingerCID[0] = 1;
+                    i=30;
+                    hasbchoose=true;
+                    choose.x=back[0].x;
+                    choose.y=back[0].y;
+                    prevLandmarkPos.x=minboundary.x;
+                    prevLandmarkPos.y=maxboundary.y;
+                }
+            }
+            //not bubble and back doesn't press on any dot=>start group
+            if (!bBubble && i<0 && !grouping) {
+                if (hasbgroup) {
+                    resetgroup();
+                }
+                grouping=true;
+                pregrouppoint.x=back[0].x;
+                pregrouppoint.y=back[0].y;
+                //gpboundary[(int)back[0].y][(int)back[0].x]=true;
             }
         }else{
             if(!isDTransing){
@@ -446,6 +532,53 @@ void testApp::touchMoved(ofTouchEventArgs &touch){
 void testApp::touchUp(ofTouchEventArgs &touch){
     frontTouch[touch.id].x = -1;
     frontTouch[touch.id].y = -1;
+    //release front touch=>end grouping
+    if (grouping) {
+        bool hasdotingroup=false;
+        grouping=false;
+        printf("end grouping\n");
+        for (int i=0; i<TARGET_NUM; i++) {
+            if(landmarks[i].x>=minboundary.x && landmarks[i].x<=maxboundary.x && landmarks[i].y>=minboundary.y && landmarks[i].y<=maxboundary.y ){
+                landmarks[i].ingroup=true;
+                groupindex[groupitemnum++]=i;
+                hasdotingroup=true;
+            }
+        }
+        if(hasdotingroup){
+            hasbgroup=true;
+        }else{
+            resetgroup();
+        }
+        /*non rect group
+        if (gpboundary[(int)back[0].x][(int)back[0].y]) {
+            for (int y=0; y<960; y++) {
+                int odd=0;
+                int minbound=0;
+                for (int x=0; x<640; x++) {
+                    if(gpboundary[y][x]){
+                        odd++;
+                        if(odd==1){
+                            minbound=x;
+                        }
+                        if (odd==2) {
+                            for (int k=minbound; k<=x; k++) {
+                                gpboundary[y][k]=true;
+                            }
+                            odd=0;
+                        }
+                    }
+                }
+            }
+        }
+        else{
+            for (int i=0; i<960; i++) {
+                for (int j=0; j<640; j++) {
+                    gpboundary[i][j]=false;
+                }
+            }
+        }
+        */
+    }
     if( touch.id < NUM_OF_FRONT){
         if(fingerCID[0]>=0){
             landmarks[fingerCID[0]].bBeingDragged = false;	            
@@ -499,6 +632,9 @@ int testApp::backPressed(int oscX, int oscY){
 }
 //--------------------------------------------------------------
 int testApp::backReleased(int oscX, int oscY){
+    if (hasbgroup) {
+        resetgroup();
+    }
     prevTouch.x = frontTouch[0].x;
     prevTouch.y = frontTouch[0].y;
     if(bSetup){
@@ -550,7 +686,27 @@ int testApp::backMoved(int oscX, int oscY){
             }
         }
     }
-
+    //save the group map
+    if (grouping) {
+        //printf("moved");
+        nextgrouppoint.x=back[0].x;
+        nextgrouppoint.y=back[0].y;
+        //gpboundary[(int)back[0].y][(int)back[0].x]=true;
+        if (nextgrouppoint.x<pregrouppoint.x) {
+            minboundary.x=nextgrouppoint.x;
+            maxboundary.x=pregrouppoint.x;
+        }else{
+            minboundary.x=pregrouppoint.x;
+            maxboundary.x=nextgrouppoint.x;
+        }
+        if (nextgrouppoint.y<pregrouppoint.y) {
+            minboundary.y=nextgrouppoint.y;
+            maxboundary.y=pregrouppoint.y;
+        }else{
+            minboundary.y=pregrouppoint.y;
+            maxboundary.y=nextgrouppoint.y;
+        }
+    }
 }
 
 
@@ -597,6 +753,23 @@ int testApp::bubbleCursor(int backX, int backY,int bID){
         }
     }
     return bubbleID;
+}
+void testApp::resetgroup(){
+    printf("reset group\n");
+    for (int j = 0; j < TARGET_NUM; j++){ 
+        landmarks[j].ingroup = false;
+        groupindex[j]=0;
+    }
+    hasbgroup=false;
+    grouping=false;
+    pregrouppoint.x=0;
+    pregrouppoint.y=0;
+    nextgrouppoint.x=0;
+    nextgrouppoint.y=0;
+    groupitemnum=0;
+    choose.x=0;
+    choose.y=0;
+    hasbchoose=false;
 }
 //--------------------------------------------------------------
 void testApp::lostFocus(){

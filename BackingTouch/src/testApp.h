@@ -27,6 +27,7 @@ typedef struct {
 	bool 	bOver;
     bool    bDest;
 //    bool    bHalo;
+    bool    ingroup;
 }	draggableVertex;
 
 
@@ -144,6 +145,21 @@ public:
     draggableVertex map;
     ofPoint maporigin;
     
+    //Group Region
+    /*this variable is for non rect group
+    bool gpboundary[960][640];
+    */
+    bool grouping;
+    bool hasbgroup;
+    bool hasbchoose;
+    ofPoint pregrouppoint;
+    ofPoint nextgrouppoint;
+    ofPoint minboundary;
+    ofPoint maxboundary;
+    int groupindex[TARGET_NUM];
+    int groupitemnum;
+    ofPoint choose;
+    void resetgroup();
 };
 
 
