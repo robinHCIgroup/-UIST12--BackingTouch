@@ -1,4 +1,5 @@
 #include <math.h>
+#include <string.h>
 #include "testApp.h"
 #include "MyGuiView.h"
 
@@ -64,11 +65,13 @@ void testApp::setup(){
     ntumap.setAnchorPercent(0.5,0.5);
     
     resetgroup();
-    /*for (int i=0; i<960; i++) {
-        for (int j=0; j<640; j++) {
-            gpboundary[i][j]=false;
-        }
-    }*/
+    
+    //filesystem
+    dir.loadImage("dir.png");
+    terminal.loadImage("terminal.png");
+    dir.setAnchorPercent(0.5, 0.5);
+    terminal.setAnchorPercent(0.5, 0.5);
+    
 }
 //--------------------------------------------------------------
 void testApp::update(){
@@ -161,6 +164,12 @@ void testApp::clearTargets(){
         landmarks[i].ingroup = false;
         landmarks[i].xmindist=0;
         landmarks[i].ymindist=0;
+        
+        //0 dir, 1 exe 2 music
+        landmarks[i].filetype=i/3;
+        landmarks[i].hidden=false;
+        landmarks[i].NuminDir=0;
+        sprintf(landmarks[i].filename,"test%d", i+1);
 	}
     canvas.x = 0;
     canvas.y = 0;
@@ -205,6 +214,12 @@ void testApp::resetTargets(){
         landmarks[i].ingroup = false;
         landmarks[i].xmindist=0;
         landmarks[i].ymindist=0;
+        
+        //0 dir, 1 exe 2 music
+        landmarks[i].filetype=i/3;
+        landmarks[i].hidden=false;
+        landmarks[i].NuminDir=0;
+        sprintf(landmarks[i].filename,"test%d", i+1);
 	}
     canvas.x = 0;
     canvas.y = 0;
@@ -254,12 +269,13 @@ void testApp::canvasUpdate(){
 void testApp::stageUpdate(int _x, int _y, bool press, int bID){
     float dX,dY,targetDist;
     float FBDist;
-    //draw map   
-    ofScale(canvasScale, canvasScale);
-    ofSetColor(255, 255, 255);
-    ntumap.draw(map.x/canvasScale,map.y/canvasScale);
-    ofScale(1/canvasScale, 1/canvasScale);
-
+    //draw map  
+    if(bBubble){
+        ofScale(canvasScale, canvasScale);
+        ofSetColor(255, 255, 255);
+        ntumap.draw(map.x/canvasScale,map.y/canvasScale);
+        ofScale(1/canvasScale, 1/canvasScale);
+    }
     if(bBubble){
         selectedIndex = bubbleCursor(_x,_y,0);
         dX = _x - landmarks[selectedIndex].x;
@@ -334,6 +350,10 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
                 }else{
                     if (choose.x>-1 && choose.y>-1) {
                         ofLine(frontTouch[0].x,frontTouch[0].y,choose.x,choose.y);
+                        ofSetLineWidth(1);
+                        ofSetColor(0,255,0);
+                        ofLine(choose.x-10,choose.y,choose.x+10,choose.y);
+                        ofLine(choose.x,choose.y-10,choose.x,choose.y+10);
                     }
                 }
                 ofSetLineWidth(1);
@@ -348,7 +368,7 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
                 ofFill();
                 if(selectedIndex>-1){
                     if(frontTouch[0].x>-1 && frontTouch[0].y>-1){
-                        
+
                     }else{
                         ofCircle(landmarks[selectedIndex].x,landmarks[selectedIndex].y,radius+5);
                         if(bBubble){
@@ -361,29 +381,55 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
         }
         ofDisableAlphaBlending();
     }
-    
-    for(int i = 0; i < TARGET_NUM ; i++){
-        int circleX = landmarks[i].x;
-        int circleY = landmarks[i].y;     
-        int circleR = radius;
-        landmarks[i].radius = radius;
-        ofFill();
-        if(!landmarks[i].bOver){
-            if(landmarks[i].bDest){
-                ofSetColor(235,110,155);
+    if(bBubble){
+        for(int i = 0; i < TARGET_NUM ; i++){
+            int circleX = landmarks[i].x;
+            int circleY = landmarks[i].y;     
+            int circleR = radius;
+            landmarks[i].radius = radius;
+            ofFill();
+            if(!landmarks[i].bOver){
+                if(landmarks[i].bDest){
+                    ofSetColor(235,110,155);
+                }else{
+                    ofSetColor(34,174,230);
+                }
             }else{
-                ofSetColor(34,174,230);
+                ofSetColor(0,255,0); 
             }
-        }else{
-            ofSetColor(0,255,0); 
+            if (landmarks[i].ingroup) {
+                ofSetColor(255, 0, 0);
+            }
+            ofCircle(circleX, circleY, circleR);
+            ofNoFill();
+            ofSetColor(52);
+            ofCircle(circleX, circleY, circleR);                
         }
-        if (landmarks[i].ingroup) {
-            ofSetColor(255, 0, 0);
+    }else{
+        ofScale(canvasScale, canvasScale);
+        ofSetColor(255, 255, 255);
+        for (int i=0; i<TARGET_NUM; i++) {
+            if (landmarks[i].hidden) {
+                continue;
+            }
+            int drawx = landmarks[i].x/canvasScale;
+            int drawy = landmarks[i].y/canvasScale;
+            ofDrawBitmapString(landmarks[i].filename, drawx-20, drawy+25);
+            switch (landmarks[i].filetype) {
+                case 0://dir
+                    dir.draw(drawx,drawy);
+                    break;
+                case 1://exe
+                    terminal.draw(drawx,drawy);
+                case 2://exe
+                    terminal.draw(drawx,drawy);
+                case 3://exe
+                    terminal.draw(drawx,drawy);
+                default:
+                    break;
+            }
         }
-        ofCircle(circleX, circleY, circleR);
-        ofNoFill();
-        ofSetColor(52);
-        ofCircle(circleX, circleY, circleR);                
+        ofScale(1/canvasScale, 1/canvasScale);
     }
     //Group boundary
     if (grouping || hasbgroup) {
@@ -478,7 +524,7 @@ void testApp::touchDown(ofTouchEventArgs &touch){
                 hasbchoose=false;
                 if(back[0].x>=minboundary.x && back[0].x<=minboundary.x |
                    back[0].y>=minboundary.y && back[0].y<=maxboundary.y ){
-                    fingerCID[0] = 1;
+                    fingerCID[0] = 100;
                     i=1;
                     hasbchoose=true;
                     choose.x=back[0].x;
@@ -575,6 +621,7 @@ void testApp::touchUp(ofTouchEventArgs &touch){
             if(bDTrans){
                 if(index>=0){
                     if(isDTransing){
+                        selectedIndex=judgeRadius(back[0].x, back[0].y, 0);
                         if(!hasbchoose){
                             ofPoint tmp;
                             if (!press[0]) {
@@ -586,11 +633,29 @@ void testApp::touchUp(ofTouchEventArgs &touch){
                             }
                             lmPos[index].x = (tmp.x-focusZoom.x)/canvasScale + focusZoom.x+ (prevCanvas.x+canvas.x);
                             lmPos[index].y = (tmp.y-focusZoom.y)/canvasScale + focusZoom.y+ (prevCanvas.y+canvas.y);
+                            if (press && selectedIndex>-1) {
+                                if (landmarks[selectedIndex].filetype==0){//isdir
+                                    landmarks[fingerCID[0]].hidden=true;
+                                    landmarks[selectedIndex].insideID[landmarks[selectedIndex].NuminDir++]=fingerCID[0];
+                                }
+                            }
                         }else{
                             for (int j=0; j<groupitemnum; j++) {
                                 index=groupindex[j];
                                 lmPos[index].x = (minboundary.x+landmarks[index].xmindist-focusZoom.x)/canvasScale + focusZoom.x+ (prevCanvas.x+canvas.x);
                                 lmPos[index].y = (minboundary.y+landmarks[index].ymindist-focusZoom.y)/canvasScale + focusZoom.y+ (prevCanvas.y+canvas.y);
+                            }
+                            selectedIndex=judgeRadius(choose.x, choose.y, 0);
+                            printf("gp %d\n",selectedIndex);
+                            if(press && selectedIndex>-1){
+                                if (landmarks[selectedIndex].filetype==0){//isdir
+                                    for (int j=0; j<groupitemnum; j++) {
+                                        int index=groupindex[j];
+                                        landmarks[index].hidden=true;
+                                        landmarks[selectedIndex].insideID[landmarks[selectedIndex].NuminDir++]=index;
+                                    }
+                                    resetgroup();
+                                }
                             }
                         }
                         isDTransing = false;
@@ -636,6 +701,7 @@ int testApp::backPressed(int oscX, int oscY){
             tempScale = 0;
         }
     }
+    return 1;
 }
 //--------------------------------------------------------------
 int testApp::backReleased(int oscX, int oscY){
@@ -656,6 +722,7 @@ int testApp::backReleased(int oscX, int oscY){
         }else{
         }
     }
+    return 1;
 }
 //--------------------------------------------------------------
 int testApp::backMoved(int oscX, int oscY){
@@ -717,6 +784,7 @@ int testApp::backMoved(int oscX, int oscY){
             maxboundary.y=nextgrouppoint.y;
         }
     }
+    return 1;
 }
 
 
@@ -738,7 +806,7 @@ int testApp::judgeRadius(int x, int y, int bID){
         float diffx = x - landmarks[i].x;
         float diffy = y - landmarks[i].y;
         float dist = sqrt(diffx*diffx + diffy*diffy);
-        if (dist < landmarks[i].radius){// && !landmarks[i].bHalo){
+        if (dist < landmarks[i].radius && !landmarks[i].hidden && i!=fingerCID[0]){// && !landmarks[i].bHalo){
             if(dist<minR){
                 minR = dist;
                 index = i;

@@ -14,7 +14,7 @@
 #define NUM_OF_BACK 1
 #define Y_OFFSET 218
 
-#define TARGET_NUM 20
+#define TARGET_NUM 12
 #define MAG_RATE 2
 #define TARGET_R 15
 
@@ -30,6 +30,14 @@ typedef struct {
     bool    ingroup;
     int     xmindist;
     int     ymindist;
+    
+    //file system
+    int filetype;
+    int NuminDir;
+    int insideID[20];
+    char filename[20];
+    int hidden;
+    
 }	draggableVertex;
 
 
@@ -163,6 +171,10 @@ public:
     int groupitemnum;
     ofPoint choose;
     void resetgroup();
+    
+    //filesystem image
+    ofImage dir;
+    ofImage terminal;
 };
 
 

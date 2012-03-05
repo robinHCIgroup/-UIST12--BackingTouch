@@ -17,6 +17,8 @@
 		BB24DDCA10DA781C00E9C588 /* ofxiphone-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB24DDC910DA781C00E9C588 /* ofxiphone-Info.plist */; };
 		BBE5EAB80F49AD8400F28951 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBE5EAB70F49AD8400F28951 /* AudioToolbox.framework */; };
 		D00D971514F0BDAE000F13AE /* NTUCAMPUS.jpg in Resources */ = {isa = PBXBuildFile; fileRef = D00D971414F0BDAE000F13AE /* NTUCAMPUS.jpg */; };
+		D04B1F9314FE05A500BE3D8E /* dir.png in Resources */ = {isa = PBXBuildFile; fileRef = D04B1F9114FE05A500BE3D8E /* dir.png */; };
+		D04B1F9414FE05A500BE3D8E /* terminal.png in Resources */ = {isa = PBXBuildFile; fileRef = D04B1F9214FE05A500BE3D8E /* terminal.png */; };
 		DA625CD013FD370F009A6582 /* install.xml in Resources */ = {isa = PBXBuildFile; fileRef = DA625CAD13FD370F009A6582 /* install.xml */; };
 		DA625CD113FD370F009A6582 /* osc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DA625CC213FD370F009A6582 /* osc.a */; };
 		DA625CD213FD370F009A6582 /* osc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DA625CC413FD370F009A6582 /* osc.a */; };
@@ -69,6 +71,8 @@
 		BB24DDC910DA781C00E9C588 /* ofxiphone-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ofxiphone-Info.plist"; sourceTree = "<group>"; };
 		BBE5EAB70F49AD8400F28951 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		D00D971414F0BDAE000F13AE /* NTUCAMPUS.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = NTUCAMPUS.jpg; path = src/NTUCAMPUS.jpg; sourceTree = SOURCE_ROOT; };
+		D04B1F9114FE05A500BE3D8E /* dir.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = dir.png; path = src/dir.png; sourceTree = SOURCE_ROOT; };
+		D04B1F9214FE05A500BE3D8E /* terminal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = terminal.png; path = src/terminal.png; sourceTree = SOURCE_ROOT; };
 		DA625CAD13FD370F009A6582 /* install.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = install.xml; sourceTree = "<group>"; };
 		DA625CB213FD370F009A6582 /* IpEndpointName.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IpEndpointName.h; sourceTree = "<group>"; };
 		DA625CB313FD370F009A6582 /* NetworkingUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NetworkingUtils.h; sourceTree = "<group>"; };
@@ -198,6 +202,8 @@
 			isa = PBXGroup;
 			children = (
 				D00D971414F0BDAE000F13AE /* NTUCAMPUS.jpg */,
+				D04B1F9114FE05A500BE3D8E /* dir.png */,
+				D04B1F9214FE05A500BE3D8E /* terminal.png */,
 			);
 			name = data;
 			path = bin/data;
@@ -430,6 +436,8 @@
 				DA625CD013FD370F009A6582 /* install.xml in Resources */,
 				DA625CDA13FD3850009A6582 /* MyGuiView.xib in Resources */,
 				D00D971514F0BDAE000F13AE /* NTUCAMPUS.jpg in Resources */,
+				D04B1F9314FE05A500BE3D8E /* dir.png in Resources */,
+				D04B1F9414FE05A500BE3D8E /* terminal.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
