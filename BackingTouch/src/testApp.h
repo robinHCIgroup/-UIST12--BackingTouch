@@ -175,6 +175,8 @@ public:
     //filesystem image
     ofImage dir;
     ofImage terminal;
+    bool dClick;
+    void showContent(int selectIndex);
 };
 
 

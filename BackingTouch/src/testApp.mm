@@ -72,6 +72,8 @@ void testApp::setup(){
     dir.setAnchorPercent(0.5, 0.5);
     terminal.setAnchorPercent(0.5, 0.5);
     
+    dClick=false;
+    
 }
 //--------------------------------------------------------------
 void testApp::update(){
@@ -138,7 +140,6 @@ void testApp::setupUpdate(int _oscX,int _oscY,bool _p){
     float senR = senRegion.x + senW/2;
     float senU = senRegion.x - senH/2; 
     float senD = senRegion.x + senH/2; 
-    float cdRatio = float(SCR_H)/senH;
     ofNoFill();
     ofSetColor(0,0,192);
     ofRect(senL, senU-Y_OFFSET, senW, senH); 
@@ -236,6 +237,7 @@ void testApp::resetTargets(){
     
     maporigin.x=320;
     maporigin.y=480;
+    dClick=false;
 } 
 //--------------------------------------------------------------
 
@@ -282,12 +284,19 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
         dY = _y - landmarks[selectedIndex].y;
         targetDist = sqrt(dX*dX + dY*dY);
     }else{
-        selectedIndex = judgeRadius(_x,_y,0);
-        if(selectedIndex>=-1){
-            //printf("%d %f %f\n",selectedIndex,landmarks[selectedIndex].x,landmarks[selectedIndex].y);
-            dX = _x - landmarks[selectedIndex].x;
-            dY = _y - landmarks[selectedIndex].y;
-            targetDist = sqrt(dX*dX + dY*dY);
+        if (dClick) {
+            showContent(selectedIndex);
+            ofSetLineWidth(1);
+            ofSetColor(0,255,0);
+            ofLine(_x-10,_y,_x+10,_y);
+            ofLine(_x,_y-10,_x,_y+10);
+        }else{
+            selectedIndex = judgeRadius(_x,_y,0);
+            if (selectedIndex>=-1) {
+                dX = _x - landmarks[selectedIndex].x;
+                dY = _y - landmarks[selectedIndex].y;
+                targetDist = sqrt(dX*dX + dY*dY);
+            }
         }
         if(hasbchoose){
             dX=_x-choose.x;
@@ -297,7 +306,7 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
     }
     ofSetColor(255);
     ofNoFill();
-    if(bDTrans){
+    if(bDTrans && !dClick){
         ofEnableAlphaBlending();
         ofSetColor(255,255,255,78);
         if(isDTransing){
@@ -307,8 +316,6 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
                         landmarks[fingerCID[0]].x = prevLandmarkPos.x;
                         landmarks[fingerCID[0]].y = prevLandmarkPos.y;
                     }else{
-                        //printf("select %f %f\n",dX,dY);
-                        //printf("%d %d\n",fingerCID[0],selectedIndex);
                         landmarks[fingerCID[0]].x= landmarks[selectedIndex].x+dX;
                         landmarks[fingerCID[0]].y= landmarks[selectedIndex].y+dY;
                     }
@@ -442,7 +449,7 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
         ofSetLineWidth(1);
         ofDisableAlphaBlending();
     }
-    if(bDTrans){
+    if(bDTrans && !dClick){
         if(isDTransing){
             if(fingerCID[0]>-1){
                 ofEnableAlphaBlending();
@@ -501,50 +508,51 @@ void testApp::touchDown(ofTouchEventArgs &touch){
         int i = -1;
         if(press[0]){ // back finger is pressing
             isDTransing = true;
-            if(bBubble){
-                i = bubbleCursor(back[0].x, back[0].y, 0);
-            }else{
-                i = judgeRadius(back[0].x, back[0].y, 0);
-            }
-            if(i>=0 && !landmarks[i].ingroup){
-                fingerCID[0] = i;
-                resetgroup();
-                landmarks[i].bOver = true;
-                if(landmarks[i].bDest){
-                    isTargetSelected = true;
+            if(!dClick){
+                if(bBubble){
+                    i = bubbleCursor(back[0].x, back[0].y, 0);
+                }else{
+                    i = judgeRadius(back[0].x, back[0].y, 0);
                 }
-                if(bDTrans){ 
-                    prevLandmarkPos.x = landmarks[i].x;
-                    prevLandmarkPos.y = landmarks[i].y;
-                    landmarks[i].bBeingDragged = true;
-                    printf("set %f %f\n",prevLandmarkPos.x,prevLandmarkPos.y);
-                }
-            }
-            if (hasbgroup) {
-                hasbchoose=false;
-                if(back[0].x>=minboundary.x && back[0].x<=minboundary.x |
-                   back[0].y>=minboundary.y && back[0].y<=maxboundary.y ){
-                    fingerCID[0] = 100;
-                    i=1;
-                    hasbchoose=true;
-                    choose.x=back[0].x;
-                    choose.y=back[0].y;
-                    prevLandmarkPos.x=minboundary.x;
-                    prevLandmarkPos.y=maxboundary.y;
-                    for (int j=0; j<groupitemnum; j++) {
-                        landmarks[groupindex[j]].bBeingDragged=true;
+                if(i>=0 && !landmarks[i].ingroup){
+                    fingerCID[0] = i;
+                    resetgroup();
+                    landmarks[i].bOver = true;
+                    if(landmarks[i].bDest){
+                        isTargetSelected = true;
+                    }
+                    if(bDTrans){ 
+                        prevLandmarkPos.x = landmarks[i].x;
+                        prevLandmarkPos.y = landmarks[i].y;
+                        landmarks[i].bBeingDragged = true;
                     }
                 }
-            }
-            //not bubble and back doesn't press on any dot=>start group
-            if (!bBubble && i<0 && !grouping) {
                 if (hasbgroup) {
-                    resetgroup();
+                    hasbchoose=false;
+                    if(back[0].x>=minboundary.x && back[0].x<=minboundary.x |
+                        back[0].y>=minboundary.y && back[0].y<=maxboundary.y ){
+                        fingerCID[0] = 100;
+                        i=1;
+                        hasbchoose=true;
+                        choose.x=back[0].x;
+                        choose.y=back[0].y;
+                        prevLandmarkPos.x=minboundary.x;
+                        prevLandmarkPos.y=maxboundary.y;
+                        for (int j=0; j<groupitemnum; j++) {
+                            landmarks[groupindex[j]].bBeingDragged=true;
+                        }
+                    }
                 }
-                grouping=true;
-                pregrouppoint.x=back[0].x;
-                pregrouppoint.y=back[0].y;
-                //gpboundary[(int)back[0].y][(int)back[0].x]=true;
+                //not bubble and back doesn't press on any dot=>start group
+                if (!bBubble && i<0 && !grouping) {
+                    if (hasbgroup) {
+                    resetgroup();
+                    }
+                    grouping=true;
+                    pregrouppoint.x=back[0].x;
+                    pregrouppoint.y=back[0].y;
+                    //gpboundary[(int)back[0].y][(int)back[0].x]=true;
+                }
             }
         }else{
             if(!isDTransing){
@@ -595,7 +603,6 @@ void testApp::touchUp(ofTouchEventArgs &touch){
     if (grouping) {
         bool hasdotingroup=false;
         grouping=false;
-        printf("end grouping\n");
         for (int i=0; i<TARGET_NUM; i++) {
             if(landmarks[i].x>=minboundary.x && landmarks[i].x<=maxboundary.x && landmarks[i].y>=minboundary.y && landmarks[i].y<=maxboundary.y ){
                 landmarks[i].ingroup=true;
@@ -613,7 +620,7 @@ void testApp::touchUp(ofTouchEventArgs &touch){
             resetgroup();
         }
     }
-    if( touch.id < NUM_OF_FRONT){
+    if( touch.id < NUM_OF_FRONT && !dClick){
         if(fingerCID[0]>=0){
             landmarks[fingerCID[0]].bBeingDragged = false;	            
             if(!landmarks[fingerCID[0]].bDest) landmarks[fingerCID[0]].bOver = false;
@@ -646,7 +653,6 @@ void testApp::touchUp(ofTouchEventArgs &touch){
                                 lmPos[index].y = (minboundary.y+landmarks[index].ymindist-focusZoom.y)/canvasScale + focusZoom.y+ (prevCanvas.y+canvas.y);
                             }
                             selectedIndex=judgeRadius(choose.x, choose.y, 0);
-                            printf("gp %d\n",selectedIndex);
                             if(press && selectedIndex>-1){
                                 if (landmarks[selectedIndex].filetype==0){//isdir
                                     for (int j=0; j<groupitemnum; j++) {
@@ -711,6 +717,11 @@ int testApp::backReleased(int oscX, int oscY){
             lmPos[index].x = (orginmin.x+landmarks[index].xmindist-focusZoom.x)/canvasScale + focusZoom.x+ (prevCanvas.x+canvas.x);
             lmPos[index].y = (orginmin.y+landmarks[index].ymindist-focusZoom.y)/canvasScale + focusZoom.y+ (prevCanvas.y+canvas.y);
         }
+    }
+    if (dClick==true) {
+        isDTransing=false;
+        fingerCID[0] = -1;
+        dClick=false;
     }
     resetgroup();
     prevTouch.x = frontTouch[0].x;
@@ -790,6 +801,14 @@ int testApp::backMoved(int oscX, int oscY){
 
 //--------------------------------------------------------------
 void testApp::touchDoubleTap(ofTouchEventArgs &touch){
+    if (press[0] && !dClick) {
+        isDTransing=false;
+        fingerCID[0] = -1;
+        selectedIndex = judgeRadius(back[0].x, back[0].y, 0);
+        if (landmarks[selectedIndex].filetype==0) {
+            dClick=true;
+        }
+    }
     if( myGuiViewController.view.hidden ){
         if( touch.id == 0 ){
             if(touch.x<80 && touch.y<80)myGuiViewController.view.hidden = NO;
@@ -806,10 +825,12 @@ int testApp::judgeRadius(int x, int y, int bID){
         float diffx = x - landmarks[i].x;
         float diffy = y - landmarks[i].y;
         float dist = sqrt(diffx*diffx + diffy*diffy);
-        if (dist < landmarks[i].radius && !landmarks[i].hidden && i!=fingerCID[0]){// && !landmarks[i].bHalo){
-            if(dist<minR){
-                minR = dist;
-                index = i;
+        if (dist < landmarks[i].radius && !landmarks[i].hidden){
+            if (i!=fingerCID[0] || dClick) {
+                if(dist<minR){
+                    minR = dist;
+                    index = i;
+                }
             }
         }	
     }
@@ -833,7 +854,6 @@ int testApp::bubbleCursor(int backX, int backY,int bID){
     return bubbleID;
 }
 void testApp::resetgroup(){
-    //printf("reset group\n");
     for (int j = 0; j < TARGET_NUM; j++){ 
         landmarks[j].ingroup = false;
         landmarks[j].xmindist=0;
@@ -849,6 +869,36 @@ void testApp::resetgroup(){
     groupitemnum=0;
     choose.x=-1;
     choose.y=-1;
+}
+//--------------------------------------------------------------
+void testApp::showContent(int index){
+    ofSetColor(255,255,255,78);
+    ofFill();
+    ofRect(1, 720, 640, 240);
+    ofSetColor(255, 255, 255);
+    int totalNum=landmarks[index].NuminDir;
+    for (int i=0; i<totalNum; i++) {
+        int tmpx=(i%4 + 1) * 50;
+        int tmpy=(i/4 + 1) * 50 + 720;
+        ofDrawBitmapString(landmarks[landmarks[index].insideID[i]].filename, tmpx-20, tmpy+25);
+        switch (landmarks[landmarks[index].insideID[i]].filetype) {
+            case 0:
+                dir.draw(tmpx, tmpy);
+                break;
+            case 1:
+                terminal.draw(tmpx, tmpy);
+                break;
+            case 2:
+                terminal.draw(tmpx, tmpy);
+                break;
+            case 3:
+                terminal.draw(tmpx, tmpy);
+                break;
+            default:
+                break;
+        }
+    }
+    ofNoFill();
 }
 //--------------------------------------------------------------
 void testApp::lostFocus(){
