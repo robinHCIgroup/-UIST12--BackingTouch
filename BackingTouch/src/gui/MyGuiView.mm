@@ -70,10 +70,12 @@
         case 1: 
             myApp->bDTrans = true;
             myApp->bBubble = false;
+            myApp->radius=36;
             statusStr = "Mode: BackingTouch"; break;
         case 2: 
             myApp->bDTrans = true;
             myApp->bBubble = true;
+            myApp->radius=15;
             statusStr = "Mode: BackingTouch+ Bubble"; break;
         default: break;
     }

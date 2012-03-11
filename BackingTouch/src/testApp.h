@@ -14,7 +14,7 @@
 #define NUM_OF_BACK 1
 #define Y_OFFSET 218
 
-#define TARGET_NUM 12
+#define TARGET_NUM 20
 #define MAG_RATE 2
 #define TARGET_R 15
 
@@ -175,7 +175,10 @@ public:
     //filesystem image
     ofImage dir;
     ofImage terminal;
+    ofImage photoIcon;
+    ofImage musicIcon;
     bool dClick;
+    bool fClick;
     void showContent(int selectIndex);
 };
 

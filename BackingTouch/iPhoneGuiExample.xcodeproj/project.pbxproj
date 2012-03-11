@@ -17,6 +17,8 @@
 		BB24DDCA10DA781C00E9C588 /* ofxiphone-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB24DDC910DA781C00E9C588 /* ofxiphone-Info.plist */; };
 		BBE5EAB80F49AD8400F28951 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BBE5EAB70F49AD8400F28951 /* AudioToolbox.framework */; };
 		D00D971514F0BDAE000F13AE /* NTUCAMPUS.jpg in Resources */ = {isa = PBXBuildFile; fileRef = D00D971414F0BDAE000F13AE /* NTUCAMPUS.jpg */; };
+		D00E2CA61507338C009456FC /* music.png in Resources */ = {isa = PBXBuildFile; fileRef = D00E2CA41507338C009456FC /* music.png */; };
+		D00E2CA71507338C009456FC /* photo.png in Resources */ = {isa = PBXBuildFile; fileRef = D00E2CA51507338C009456FC /* photo.png */; };
 		D04B1F9314FE05A500BE3D8E /* dir.png in Resources */ = {isa = PBXBuildFile; fileRef = D04B1F9114FE05A500BE3D8E /* dir.png */; };
 		D04B1F9414FE05A500BE3D8E /* terminal.png in Resources */ = {isa = PBXBuildFile; fileRef = D04B1F9214FE05A500BE3D8E /* terminal.png */; };
 		DA625CD013FD370F009A6582 /* install.xml in Resources */ = {isa = PBXBuildFile; fileRef = DA625CAD13FD370F009A6582 /* install.xml */; };
@@ -71,6 +73,8 @@
 		BB24DDC910DA781C00E9C588 /* ofxiphone-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "ofxiphone-Info.plist"; sourceTree = "<group>"; };
 		BBE5EAB70F49AD8400F28951 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = System/Library/Frameworks/AudioToolbox.framework; sourceTree = SDKROOT; };
 		D00D971414F0BDAE000F13AE /* NTUCAMPUS.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; name = NTUCAMPUS.jpg; path = src/NTUCAMPUS.jpg; sourceTree = SOURCE_ROOT; };
+		D00E2CA41507338C009456FC /* music.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = music.png; path = src/music.png; sourceTree = SOURCE_ROOT; };
+		D00E2CA51507338C009456FC /* photo.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = photo.png; path = src/photo.png; sourceTree = SOURCE_ROOT; };
 		D04B1F9114FE05A500BE3D8E /* dir.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = dir.png; path = src/dir.png; sourceTree = SOURCE_ROOT; };
 		D04B1F9214FE05A500BE3D8E /* terminal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = terminal.png; path = src/terminal.png; sourceTree = SOURCE_ROOT; };
 		DA625CAD13FD370F009A6582 /* install.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = install.xml; sourceTree = "<group>"; };
@@ -203,6 +207,8 @@
 			children = (
 				D00D971414F0BDAE000F13AE /* NTUCAMPUS.jpg */,
 				D04B1F9114FE05A500BE3D8E /* dir.png */,
+				D00E2CA41507338C009456FC /* music.png */,
+				D00E2CA51507338C009456FC /* photo.png */,
 				D04B1F9214FE05A500BE3D8E /* terminal.png */,
 			);
 			name = data;
@@ -438,6 +444,8 @@
 				D00D971514F0BDAE000F13AE /* NTUCAMPUS.jpg in Resources */,
 				D04B1F9314FE05A500BE3D8E /* dir.png in Resources */,
 				D04B1F9414FE05A500BE3D8E /* terminal.png in Resources */,
+				D00E2CA61507338C009456FC /* music.png in Resources */,
+				D00E2CA71507338C009456FC /* photo.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

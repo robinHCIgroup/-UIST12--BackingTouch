@@ -69,10 +69,15 @@ void testApp::setup(){
     //filesystem
     dir.loadImage("dir.png");
     terminal.loadImage("terminal.png");
+    photoIcon.loadImage("photo.png");
+    musicIcon.loadImage("music.png");
     dir.setAnchorPercent(0.5, 0.5);
     terminal.setAnchorPercent(0.5, 0.5);
+    musicIcon.setAnchorPercent(0.5, 0.5);
+    photoIcon.setAnchorPercent(0.5, 0.5);
     
     dClick=false;
+    fClick=false;
     
 }
 //--------------------------------------------------------------
@@ -167,7 +172,7 @@ void testApp::clearTargets(){
         landmarks[i].ymindist=0;
         
         //0 dir, 1 exe 2 music
-        landmarks[i].filetype=i/3;
+        landmarks[i].filetype=i/5;
         landmarks[i].hidden=false;
         landmarks[i].NuminDir=0;
         sprintf(landmarks[i].filename,"test%d", i+1);
@@ -186,6 +191,8 @@ void testApp::clearTargets(){
     
     maporigin.x=320;
     maporigin.y=480;
+    dClick=false;
+    fClick=false;
 }
 
 void testApp::resetTargets(){
@@ -217,7 +224,7 @@ void testApp::resetTargets(){
         landmarks[i].ymindist=0;
         
         //0 dir, 1 exe 2 music
-        landmarks[i].filetype=i/3;
+        landmarks[i].filetype=i/5;
         landmarks[i].hidden=false;
         landmarks[i].NuminDir=0;
         sprintf(landmarks[i].filename,"test%d", i+1);
@@ -238,6 +245,7 @@ void testApp::resetTargets(){
     maporigin.x=320;
     maporigin.y=480;
     dClick=false;
+    fClick=false;
 } 
 //--------------------------------------------------------------
 
@@ -252,7 +260,11 @@ void testApp::canvasUpdate(){
         landmarks[i].x = canvasScale*(landmarks[i].x - focusZoom.x)+focusZoom.x;
         landmarks[i].y = canvasScale*(landmarks[i].y - focusZoom.y)+focusZoom.y;
     }
-    radius= float(TARGET_R) * canvasScale;
+    if(bBubble){
+        radius = float(TARGET_R) * canvasScale;
+    }else {
+        radius = 36.0 * canvasScale;
+    }
     //if landmark is in group, move them
     
     //
@@ -284,7 +296,7 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
         dY = _y - landmarks[selectedIndex].y;
         targetDist = sqrt(dX*dX + dY*dY);
     }else{
-        if (dClick) {
+        if (dClick || fClick) {
             showContent(selectedIndex);
             ofSetLineWidth(1);
             ofSetColor(0,255,0);
@@ -357,10 +369,6 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
                 }else{
                     if (choose.x>-1 && choose.y>-1) {
                         ofLine(frontTouch[0].x,frontTouch[0].y,choose.x,choose.y);
-                        ofSetLineWidth(1);
-                        ofSetColor(0,255,0);
-                        ofLine(choose.x-10,choose.y,choose.x+10,choose.y);
-                        ofLine(choose.x,choose.y-10,choose.x,choose.y+10);
                     }
                 }
                 ofSetLineWidth(1);
@@ -404,9 +412,6 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
             }else{
                 ofSetColor(0,255,0); 
             }
-            if (landmarks[i].ingroup) {
-                ofSetColor(255, 0, 0);
-            }
             ofCircle(circleX, circleY, circleR);
             ofNoFill();
             ofSetColor(52);
@@ -421,22 +426,38 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
             }
             int drawx = landmarks[i].x/canvasScale;
             int drawy = landmarks[i].y/canvasScale;
-            ofDrawBitmapString(landmarks[i].filename, drawx-20, drawy+25);
+            ofDrawBitmapString(landmarks[i].filename, drawx-20, drawy+50);
+            if(landmarks[i].ingroup && hasbchoose){
+                ofSetColor(255, 255, 255, 78);
+            }
             switch (landmarks[i].filetype) {
                 case 0://dir
                     dir.draw(drawx,drawy);
                     break;
                 case 1://exe
                     terminal.draw(drawx,drawy);
-                case 2://exe
-                    terminal.draw(drawx,drawy);
-                case 3://exe
-                    terminal.draw(drawx,drawy);
+                    break;
+                case 2://music
+                    musicIcon.draw(drawx,drawy);
+                    break;
+                case 3://photo
+                    photoIcon.draw(drawx,drawy);
+                    break;
                 default:
                     break;
             }
+            ofSetColor(255, 255, 255);
         }
         ofScale(1/canvasScale, 1/canvasScale);
+        if (bDTrans && !dClick && isDTransing && fingerCID[0]>-1 && hasbchoose) {
+            if (choose.x>-1 && choose.y>-1) {
+                ofSetLineWidth(3);
+                ofSetColor(255,255,255);
+                ofLine(minboundary.x,_y,maxboundary.x,_y);
+                ofLine(_x,minboundary.y,_x,maxboundary.y);
+                ofCircle(_x, _y, radius+5);
+            }
+        }
     }
     //Group boundary
     if (grouping || hasbgroup) {
@@ -445,6 +466,12 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
         ofSetColor(255,255,255,78);
         ofSetLineWidth(radius);
         ofRect(minboundary.x, minboundary.y, maxboundary.x-minboundary.x, maxboundary.y-minboundary.y);
+        ofSetColor(255, 255, 255, 50);
+        for (int j=0; j<groupitemnum; j++) {
+            if (!landmarks[groupindex[j]].hidden) {
+                ofCircle(landmarks[groupindex[j]].x, landmarks[groupindex[j]].y, radius+5);
+            }
+        }
         ofNoFill();
         ofSetLineWidth(1);
         ofDisableAlphaBlending();
@@ -484,7 +511,7 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
                 ofEnableAlphaBlending();
                 ofFill();
                 ofSetColor(255,255,255,78);
-                ofCircle(frontTouch[0].x,frontTouch[0].y, magWidgetR);
+                ofCircle(frontTouch[0].x,frontTouch[0].y, radius);
                 ofSetColor(255,255,255,192);
                 ofLine(frontTouch[0].x-magWidgetR,frontTouch[0].y,frontTouch[0].x+magWidgetR,frontTouch[0].y);
                 ofLine(frontTouch[0].x,frontTouch[0].y-magWidgetR,frontTouch[0].x,frontTouch[0].y+magWidgetR);
@@ -529,8 +556,8 @@ void testApp::touchDown(ofTouchEventArgs &touch){
                 }
                 if (hasbgroup) {
                     hasbchoose=false;
-                    if(back[0].x>=minboundary.x && back[0].x<=minboundary.x |
-                        back[0].y>=minboundary.y && back[0].y<=maxboundary.y ){
+                    if(back[0].x>=minboundary.x && back[0].x<=maxboundary.x 
+                       && back[0].y>=minboundary.y && back[0].y<=maxboundary.y ){
                         fingerCID[0] = 100;
                         i=1;
                         hasbchoose=true;
@@ -557,19 +584,30 @@ void testApp::touchDown(ofTouchEventArgs &touch){
         }else{
             if(!isDTransing){
                 i = judgeRadius(touch.x, touch.y, 0);
-                if(i>=0){
-                    isTranslating = true;
-                    fingerCID[0] = i;
-                    landmarks[i].bOver = true;
-                    if(landmarks[i].bDest){
-                        isTargetSelected = true;                        
+                if(!fClick){
+                    if(i>=0){
+                        isTranslating = true;
+                        fingerCID[0] = i;
+                        landmarks[i].bOver = true;
+                        if(landmarks[i].bDest){
+                            isTargetSelected = true;                        
+                        }
+//                      prevLandmarkPos.x = landmarks[i].x;
+//                      prevLandmarkPos.y = landmarks[i].y;
+                        landmarks[i].bBeingDragged = true;
+                    }else{
+                        prevTouch.x = touch.x;
+                        prevTouch.y = touch.y;
                     }
-//                    prevLandmarkPos.x = landmarks[i].x;
-//                    prevLandmarkPos.y = landmarks[i].y;
-                    landmarks[i].bBeingDragged = true;
                 }else{
-                    prevTouch.x = touch.x;
-                    prevTouch.y = touch.y;
+                    if(i>=0){
+                        if(landmarks[i].filetype!=0){
+                            i=-1;
+                        }
+                    }
+                    if(i==-1){
+                        fClick=false;
+                    }
                 }
             }
         }
@@ -655,12 +693,21 @@ void testApp::touchUp(ofTouchEventArgs &touch){
                             selectedIndex=judgeRadius(choose.x, choose.y, 0);
                             if(press && selectedIndex>-1){
                                 if (landmarks[selectedIndex].filetype==0){//isdir
+                                    bool check=false;
                                     for (int j=0; j<groupitemnum; j++) {
                                         int index=groupindex[j];
-                                        landmarks[index].hidden=true;
-                                        landmarks[selectedIndex].insideID[landmarks[selectedIndex].NuminDir++]=index;
+                                        if (index==selectedIndex) {
+                                            check=true;
+                                        }
                                     }
-                                    resetgroup();
+                                    if (!check) {
+                                        for (int j=0; j<groupitemnum; j++) {
+                                            int index=groupindex[j];
+                                            landmarks[index].hidden=true;
+                                            landmarks[selectedIndex].insideID[landmarks[selectedIndex].NuminDir++]=index;    
+                                        }
+                                        resetgroup();
+                                    }
                                 }
                             }
                         }
@@ -672,6 +719,13 @@ void testApp::touchUp(ofTouchEventArgs &touch){
                     if(isTranslating){
                         lmPos[index].x = (touch.x-focusZoom.x)/canvasScale + focusZoom.x+ (prevCanvas.x+canvas.x);
                         lmPos[index].y = (touch.y-focusZoom.y)/canvasScale + focusZoom.y+ (prevCanvas.y+canvas.y);
+                        selectedIndex=judgeRadius(touch.x, touch.y, 0);
+                        if(selectedIndex>-1){
+                            if (landmarks[selectedIndex].filetype==0){//isdir
+                                landmarks[index].hidden=true;
+                                landmarks[selectedIndex].insideID[landmarks[selectedIndex].NuminDir++]=index;
+                            }
+                        }
                         isTranslating = false;
                     }
                     isTargetTranslated = true;
@@ -809,6 +863,12 @@ void testApp::touchDoubleTap(ofTouchEventArgs &touch){
             dClick=true;
         }
     }
+    if(!press[0] && !fClick){
+        selectedIndex = judgeRadius(touch.x, touch.y, 0);
+        if(landmarks[selectedIndex].filetype==0){
+            fClick=true;
+        }
+    }
     if( myGuiViewController.view.hidden ){
         if( touch.id == 0 ){
             if(touch.x<80 && touch.y<80)myGuiViewController.view.hidden = NO;
@@ -878,9 +938,13 @@ void testApp::showContent(int index){
     ofSetColor(255, 255, 255);
     int totalNum=landmarks[index].NuminDir;
     for (int i=0; i<totalNum; i++) {
-        int tmpx=(i%4 + 1) * 50;
-        int tmpy=(i/4 + 1) * 50 + 720;
-        ofDrawBitmapString(landmarks[landmarks[index].insideID[i]].filename, tmpx-20, tmpy+25);
+        int tmpx=(i%4 + 1) * 120;
+        int mul=80;
+        if (i/4==0) {
+            mul=50;
+        }
+        int tmpy=(i/4 + 1) * mul + 720;
+        ofDrawBitmapString(landmarks[landmarks[index].insideID[i]].filename, tmpx-20, tmpy+50);
         switch (landmarks[landmarks[index].insideID[i]].filetype) {
             case 0:
                 dir.draw(tmpx, tmpy);
@@ -889,10 +953,10 @@ void testApp::showContent(int index){
                 terminal.draw(tmpx, tmpy);
                 break;
             case 2:
-                terminal.draw(tmpx, tmpy);
+                musicIcon.draw(tmpx, tmpy);
                 break;
             case 3:
-                terminal.draw(tmpx, tmpy);
+                photoIcon.draw(tmpx, tmpy);
                 break;
             default:
                 break;
