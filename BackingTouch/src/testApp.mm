@@ -57,6 +57,11 @@ void testApp::setup(){
         clearTargets();
     }
     
+    openDot=false;
+    dotSelect=false;
+    bigDot.x=60;
+    bigDot.y=60;
+    bigDot.radius=60;
     
     //set map path and change the draw point
     ntumap.loadImage("NTUCAMPUS.jpg");
@@ -164,6 +169,12 @@ void testApp::clearTargets(){
     
     maporigin.x=320;
     maporigin.y=480;
+    
+    openDot=false;
+    dotSelect=false;
+    bigDot.x=60;
+    bigDot.y=60;
+    bigDot.radius=60;
 }
 
 void testApp::resetTargets(){
@@ -205,6 +216,12 @@ void testApp::resetTargets(){
     
     maporigin.x=320;
     maporigin.y=480;
+    
+    openDot=false;
+    dotSelect=false;
+    bigDot.x=60;
+    bigDot.y=60;
+    bigDot.radius=60;
 } 
 //--------------------------------------------------------------
 
@@ -236,13 +253,13 @@ void testApp::canvasUpdate(){
 void testApp::stageUpdate(int _x, int _y, bool press, int bID){
     float dX,dY,targetDist;
     float FBDist;
-    
+    /*
     //draw map   
     ofScale(canvasScale, canvasScale);
     ofSetColor(255, 255, 255);
     ntumap.draw(map.x/canvasScale,map.y/canvasScale);
     ofScale(1/canvasScale, 1/canvasScale);
-    
+    */
     if(bBubble){
         selectedIndex = bubbleCursor(_x,_y,0);
         dX = _x - landmarks[selectedIndex].x;
@@ -324,10 +341,15 @@ void testApp::stageUpdate(int _x, int _y, bool press, int bID){
         ofSetColor(52);
         ofCircle(circleX, circleY, circleR);                
     }
-    
+    if(openDot){
+        ofEnableAlphaBlending();
+        ofFill();
+        ofSetColor(255,255,255,78);
+        ofCircle(bigDot.x, bigDot.y, bigDot.radius);
+    }
     if(bDTrans){
         if(isDTransing){
-            if(fingerCID[0]>-1){
+            if(fingerCID[0]>-1 && !openDot){
                 ofEnableAlphaBlending();
                 ofFill();
                 ofSetColor(255,255,255,78);
@@ -389,7 +411,7 @@ void testApp::touchDown(ofTouchEventArgs &touch){
             }else{
                 i = judgeRadius(back[0].x, back[0].y, 0);
             }
-            if(i>=0){
+            if(judgeDot(touch.x, touch.y, 0) && i>=0){
                 fingerCID[0] = i;
                 landmarks[i].bOver = true;
                 if(landmarks[i].bDest){
@@ -425,6 +447,10 @@ void testApp::touchDown(ofTouchEventArgs &touch){
 
 //--------------------------------------------------------------
 void testApp::touchMoved(ofTouchEventArgs &touch){
+    if (dotSelect) {
+        bigDot.x=touch.x;
+        bigDot.y=touch.y;
+    }
     if( touch.id < NUM_OF_FRONT){
         frontTouch[touch.id].x = touch.x;
         frontTouch[touch.id].y = touch.y;
@@ -454,8 +480,16 @@ void testApp::touchUp(ofTouchEventArgs &touch){
             if(bDTrans){
                 if(index>=0){
                     if(isDTransing){
-                        lmPos[index].x = (back[0].x-focusZoom.x)/canvasScale + focusZoom.x+ (prevCanvas.x+canvas.x);
-                        lmPos[index].y = (back[0].y-focusZoom.y)/canvasScale + focusZoom.y+ (prevCanvas.y+canvas.y);
+                        ofPoint tmp;
+                        if (!press[0]) {
+                            tmp.x=prevLandmarkPos.x;
+                            tmp.y=prevLandmarkPos.y;
+                        }else{
+                            tmp.x=back[0].x;
+                            tmp.y=back[0].y;
+                        }
+                        lmPos[index].x = (tmp.x-focusZoom.x)/canvasScale + focusZoom.x+ (prevCanvas.x+canvas.x);
+                        lmPos[index].y = (tmp.y-focusZoom.y)/canvasScale + focusZoom.y+ (prevCanvas.y+canvas.y);
                         isDTransing = false;
                     }
                     if(isTranslating){
@@ -480,10 +514,16 @@ void testApp::touchUp(ofTouchEventArgs &touch){
             }
         }
     }
+    if (openDot && dotSelect) {
+        dotSelect=false;
+    }
 }
 
 //-------------------------------------------------------------- lense/selected
 int testApp::backPressed(int oscX, int oscY){
+    if(!bBubble){
+        openDot=true;
+    }
     if(bSetup){
         
     }else{
@@ -499,6 +539,13 @@ int testApp::backPressed(int oscX, int oscY){
 }
 //--------------------------------------------------------------
 int testApp::backReleased(int oscX, int oscY){
+    if(openDot){
+        dotSelect=false;
+        openDot=false;
+        //bigDot.x=60;
+        //bigDot.y=60;
+        //bigDot.radius=60;
+    }
     prevTouch.x = frontTouch[0].x;
     prevTouch.y = frontTouch[0].y;
     if(bSetup){
@@ -581,7 +628,21 @@ int testApp::judgeRadius(int x, int y, int bID){
     }
     return index;
 }
-
+bool testApp::judgeDot(int x, int y, int bID){
+    int index = -1;
+    int minR = 640+960;
+    float diffx = x - bigDot.x;
+    float diffy = y - bigDot.y;
+    float dist = sqrt(diffx*diffx + diffy*diffy);
+    if (dist < bigDot.radius){// && !landmarks[i].bHalo){
+        if(dist<minR){
+            minR = dist;
+            dotSelect=true;
+            return true;
+        }
+    }	
+    return false;
+}
 //--------------------------------------------------------------
 int testApp::bubbleCursor(int backX, int backY,int bID){
     int bubbleID = -1;

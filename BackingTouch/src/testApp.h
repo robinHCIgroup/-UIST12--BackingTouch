@@ -144,6 +144,12 @@ public:
     draggableVertex map;
     ofPoint maporigin;
     
+    //new
+    bool openDot;
+    bool dotSelect;
+    draggableVertex bigDot;
+    bool judgeDot(int x, int y, int bID);
+    
 };
 
 
